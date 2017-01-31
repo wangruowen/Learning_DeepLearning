@@ -446,14 +446,14 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
            ' ran for %.1fs' % ((end_time - start_time))), file=sys.stderr)
 
 
-def predict():
+def predict(model='best_model.pkl'):
     """
     An example of how to load a trained model and use it
     to predict labels.
     """
 
     # load the saved model
-    classifier = pickle.load(open('best_model.pkl'))
+    classifier = pickle.load(open(model))
 
     # compile a predictor function
     predict_model = theano.function(

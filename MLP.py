@@ -33,8 +33,8 @@ import numpy
 import theano
 import theano.tensor as T
 
-
-from logistic_sgd import LogisticRegression, load_data
+import six.moves.cPickle as pickle
+from logistic_sgd import LogisticRegression, load_data, predict
 
 
 # start-snippet-1
@@ -404,7 +404,12 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
     print(('The code for file ' +
            os.path.split(__file__)[1] +
            ' ran for %.2fm' % ((end_time - start_time) / 60.)), file=sys.stderr)
+    print("Save the best model ...")
+    with open('best_model_MLP.pkl', 'wb') as f:
+        pickle.dump(classifier, f)
 
 
 if __name__ == '__main__':
     test_mlp()
+    print("Now let's do some prediction")
+    predict("best_model_MLP.pkl")
