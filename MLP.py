@@ -33,7 +33,7 @@ import numpy
 import theano
 import theano.tensor as T
 
-import six.moves.cPickle as pickle
+import dill
 from logistic_sgd import LogisticRegression, load_data, predict
 
 
@@ -188,6 +188,9 @@ class MLP(object):
         )
         # same holds for the function computing the number of errors
         self.errors = self.logRegressionLayer.errors
+
+        # same holds for the prediction 
+        self.y_pred = self.logRegressionLayer.y_pred
 
         # the parameters of the model are the parameters of the two layer it is
         # made out of
@@ -406,7 +409,7 @@ def test_mlp(learning_rate=0.01, L1_reg=0.00, L2_reg=0.0001, n_epochs=1000,
            ' ran for %.2fm' % ((end_time - start_time) / 60.)), file=sys.stderr)
     print("Save the best model ...")
     with open('best_model_MLP.pkl', 'wb') as f:
-        pickle.dump(classifier, f)
+        dill.dump(classifier, f)
 
 
 if __name__ == '__main__':

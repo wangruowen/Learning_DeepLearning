@@ -37,7 +37,8 @@ from __future__ import print_function
 
 __docformat__ = 'restructedtext en'
 
-import six.moves.cPickle as pickle
+# import six.moves.cPickle as pickle
+import dill
 import gzip
 import os
 import sys
@@ -209,9 +210,9 @@ def load_data(dataset):
     # Load the dataset
     with gzip.open(dataset, 'rb') as f:
         try:
-            train_set, valid_set, test_set = pickle.load(f, encoding='latin1')
+            train_set, valid_set, test_set = dill.load(f, encoding='latin1')
         except:
-            train_set, valid_set, test_set = pickle.load(f)
+            train_set, valid_set, test_set = dill.load(f)
     # train_set, valid_set, test_set format: tuple(input, target)
     # input is a numpy.ndarray of 2 dimensions (a matrix)
     # where each row corresponds to an example. target is a
@@ -425,7 +426,7 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
 
                     # save the best model
                     with open('best_model.pkl', 'wb') as f:
-                        pickle.dump(classifier, f)
+                        dill.dump(classifier, f)
 
             if patience <= iter:
                 done_looping = True
@@ -453,7 +454,7 @@ def predict(model='best_model.pkl'):
     """
 
     # load the saved model
-    classifier = pickle.load(open(model))
+    classifier = dill.load(open(model))
 
     # compile a predictor function
     predict_model = theano.function(
