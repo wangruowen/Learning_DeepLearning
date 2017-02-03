@@ -119,15 +119,15 @@ class LeNetConvPoolLayer(object):
 
 
 class LeNet5(object):
-    def __init__(self, rng, input, nkerns):
+    def __init__(self, rng, input, batch_size, nkerns):
         # Keep track of model input
         self.input = input
-        batch_size = input.get_value(borrow=True).shape[0]
+        self.batch_size = batch_size
 
         # Reshape matrix of rasterized images of shape (batch_size, 28 * 28)
         # to a 4D tensor, compatible with our LeNetConvPoolLayer
         # (28, 28) is the size of MNIST images.
-        layer0_input = input.reshape((batch_size, 1, 28, 28))
+        layer0_input = input.reshape((self.batch_size, 1, 28, 28))
 
         # Construct the first convolutional pooling layer:
         # filtering reduces the image size to (28-5+1 , 28-5+1) = (24, 24)
@@ -136,7 +136,7 @@ class LeNet5(object):
         self.layer0 = LeNetConvPoolLayer(
             rng,
             input=layer0_input,
-            image_shape=(batch_size, 1, 28, 28),
+            image_shape=(self.batch_size, 1, 28, 28),
             filter_shape=(nkerns[0], 1, 5, 5),
             poolsize=(2, 2)
         )
@@ -148,7 +148,7 @@ class LeNet5(object):
         self.layer1 = LeNetConvPoolLayer(
             rng,
             input=self.layer0.output,
-            image_shape=(batch_size, nkerns[0], 12, 12),
+            image_shape=(self.batch_size, nkerns[0], 12, 12),
             filter_shape=(nkerns[1], nkerns[0], 5, 5),
             poolsize=(2, 2)
         )
@@ -171,6 +171,7 @@ class LeNet5(object):
         # classify the values of the fully-connected sigmoidal layer
         self.layer3 = LogisticRegression(input=self.layer2.output, n_in=500, n_out=10)
 
+        # Prediction output
         self.y_pred = self.layer3.y_pred
 
 
@@ -221,7 +222,7 @@ def evaluate_lenet5(learning_rate=0.1, n_epochs=200,
     # BUILD ACTUAL MODEL #
     ######################
     print('... building the model')
-    classifier = LeNet5(rng, x, nkerns)
+    classifier = LeNet5(rng, x, batch_size, nkerns)
 
     # the cost we minimize during training is the NLL of the model
     cost = classifier.layer3.negative_log_likelihood(y)
@@ -361,7 +362,7 @@ def evaluate_lenet5(learning_rate=0.1, n_epochs=200,
 if __name__ == '__main__':
     evaluate_lenet5()
     print("Now let's do some prediction")
-    predict("best_model_LeNet5.pkl")
+    predict("best_model_LeNet5.pkl", batch_size=500)
 
 
 def experiment(state, channel):

@@ -447,7 +447,7 @@ def sgd_optimization_mnist(learning_rate=0.13, n_epochs=1000,
            ' ran for %.1fs' % ((end_time - start_time))), file=sys.stderr)
 
 
-def predict(model='best_model.pkl'):
+def predict(model='best_model.pkl', batch_size=50):
     """
     An example of how to load a trained model and use it
     to predict labels.
@@ -455,6 +455,8 @@ def predict(model='best_model.pkl'):
 
     # load the saved model
     classifier = dill.load(open(model))
+    if batch_size != 50:
+        classifier.batch_size = batch_size
 
     # compile a predictor function
     predict_model = theano.function(
@@ -468,13 +470,13 @@ def predict(model='best_model.pkl'):
     test_set_x = test_set_x.get_value()
     test_set_y_eval = test_set_y.eval()
 
-    predicted_values = predict_model(test_set_x[:50])
+    predicted_values = predict_model(test_set_x[:batch_size])
     print("Predicted values for the first 10 examples in test set:")
     print(predicted_values)
     print("Actual values:")
-    print(test_set_y_eval[:50])
+    print(test_set_y_eval[:batch_size])
     print("Diff:")
-    print(predicted_values - test_set_y_eval[:50])
+    print(predicted_values - test_set_y_eval[:batch_size])
 
 
 if __name__ == '__main__':
