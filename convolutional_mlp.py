@@ -41,7 +41,7 @@ import dill
 
 
 class LeNetConvPoolLayer(object):
-    """Pool Layer of a convolutional network """
+    """One Pool Layer of a convolutional network """
 
     def __init__(self, rng, input, filter_shape, image_shape, poolsize=(2, 2)):
         """
@@ -119,7 +119,11 @@ class LeNetConvPoolLayer(object):
 
 
 class LeNet5(object):
-    def __init__(self, rng, input, batch_size, nkerns):
+    def __init__(self, rng, input, nkerns):
+        # Keep track of model input
+        self.input = input
+        batch_size = input.get_value(borrow=True).shape[0]
+
         # Reshape matrix of rasterized images of shape (batch_size, 28 * 28)
         # to a 4D tensor, compatible with our LeNetConvPoolLayer
         # (28, 28) is the size of MNIST images.
@@ -166,6 +170,8 @@ class LeNet5(object):
 
         # classify the values of the fully-connected sigmoidal layer
         self.layer3 = LogisticRegression(input=self.layer2.output, n_in=500, n_out=10)
+
+        self.y_pred = self.layer3.y_pred
 
 
 def evaluate_lenet5(learning_rate=0.1, n_epochs=200,
@@ -215,15 +221,16 @@ def evaluate_lenet5(learning_rate=0.1, n_epochs=200,
     # BUILD ACTUAL MODEL #
     ######################
     print('... building the model')
-    classifier = LeNet5(rng, x, batch_size, nkerns)
+    classifier = LeNet5(rng, x, nkerns)
 
     # the cost we minimize during training is the NLL of the model
     cost = classifier.layer3.negative_log_likelihood(y)
+    error = classifier.layer3.errors(y)
 
     # create a function to compute the mistakes that are made by the model
     test_model = theano.function(
         [index],
-        classifier.layer3.errors(y),
+        error,
         givens={
             x: test_set_x[index * batch_size: (index + 1) * batch_size],
             y: test_set_y[index * batch_size: (index + 1) * batch_size]
@@ -232,7 +239,7 @@ def evaluate_lenet5(learning_rate=0.1, n_epochs=200,
 
     validate_model = theano.function(
         [index],
-        classifier.layer3.errors(y),
+        error,
         givens={
             x: valid_set_x[index * batch_size: (index + 1) * batch_size],
             y: valid_set_y[index * batch_size: (index + 1) * batch_size]
